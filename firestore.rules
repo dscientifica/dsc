@@ -1,0 +1,58 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function inOrg(orgId) {
+      return request.auth.token.orgId == orgId;
+    }
+
+    function hasRole(role) {
+      return request.auth.token.roles != null && role in request.auth.token.roles;
+    }
+
+    match /orgs/{orgId} {
+      allow read: if isSignedIn() && inOrg(orgId);
+      allow write: if isSignedIn() && inOrg(orgId) && hasRole("admin");
+
+      match /users/{userId} {
+        allow read: if isSignedIn() && inOrg(orgId);
+        allow update: if isSignedIn() && inOrg(orgId) && request.auth.uid == userId;
+      }
+
+      match /equipamentos/{equipId} {
+        allow read: if isSignedIn() && inOrg(orgId);
+        allow create, update, delete: if isSignedIn() && inOrg(orgId) && (hasRole("admin") || hasRole("metrologista"));
+
+        match /calibracoes/{calibId} {
+          allow read: if isSignedIn() && inOrg(orgId);
+          allow create, update, delete: if isSignedIn() && inOrg(orgId) && (hasRole("admin") || hasRole("metrologista"));
+        }
+      }
+
+      match /laboratorios/{labId} {
+        allow read: if isSignedIn() && inOrg(orgId);
+        allow write: if isSignedIn() && inOrg(orgId) && (hasRole("admin") || hasRole("metrologista"));
+      }
+
+      match /padroes/{padraoId} {
+        allow read: if isSignedIn() && inOrg(orgId);
+        allow write: if isSignedIn() && inOrg(orgId) && (hasRole("admin") || hasRole("metrologista"));
+      }
+
+      match /naoConformidades/{ncId} {
+        allow read: if isSignedIn() && inOrg(orgId);
+        allow write: if isSignedIn() && inOrg(orgId) && (hasRole("admin") || hasRole("metrologista"));
+      }
+
+      match /auditoria/{auditId} {
+        allow read: if isSignedIn() && inOrg(orgId);
+        allow write: if false; // Somente via Cloud Function
+      }
+    }
+  }
+}

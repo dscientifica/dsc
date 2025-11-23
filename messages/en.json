@@ -1,0 +1,10 @@
+{
+  "app.title": "Calibration Management (ISO/IEC 17025)",
+  "login.title": "Sign In",
+  "dashboard.title": "Overview",
+  "equipments.title": "Equipment",
+  "equipments.new": "New Equipment",
+  "calibration.new": "New Calibration",
+  "rbc.preferred": "Preference: RBC",
+  "logout": "Logout"
+}
